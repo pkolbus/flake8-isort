@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from difflib import Differ
-from isort import SortImports
 from testfixtures import OutputCapture
+
+import isort.api
 
 
 __version__ = '4.0.0.dev0'
@@ -50,23 +51,29 @@ class Flake8Isort(object):
         cls.show_traceback = options.isort_show_traceback
 
     def run(self):
-        if self.filename is not self.stdin_display_name:
-            file_path = self.filename
-        else:
-            file_path = None
         with OutputCapture() as buffer:
-            sort_result = SortImports(
-                file_path=file_path,
-                file_contents=''.join(self.lines),
-                check=True,
-                show_diff=True,
-            )
-        traceback = self._format_isort_output(buffer)
+            try:
+                if self.filename is not self.stdin_display_name:
+                    sort_result = isort.api.check_file(
+                        filename=self.filename,
+                        show_diff=True,
+                    )
+                else:
+                    sort_result = isort.api.check_code_string(
+                        code=''.join(self.lines),
+                        show_diff=True,
+                    )
+            except isort.exceptions.FileSkipComment:
+                return
 
-        for line_num, message in self.sortimports_linenum_msg(sort_result):
-            if self.show_traceback:
-                message += traceback
-            yield line_num, 0, message, type(self)
+        if not sort_result:
+            traceback = self._format_isort_output(buffer)
+            yield 1, 0, self.isort_unsorted + traceback, type(self)
+
+        # for line_num, message in self.sortimports_linenum_msg(sort_result):
+        #     if self.show_traceback:
+        #         message += traceback
+        #     yield line_num, 0, message, type(self)
 
     def sortimports_linenum_msg(self, sort_result):
         """Parses isort.SortImports for line number changes and message

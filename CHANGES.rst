@@ -7,6 +7,8 @@ Changelog
 ------------------
 
 - Drop support for python 2.7 and 3.5, which aren't supported by isort 5.
+- Support `isort` 5.x only.
+  [pkolbus]
 
 
 3.0.1 (2020-07-08)
