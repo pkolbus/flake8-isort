@@ -3,10 +3,10 @@
 Changelog
 =========
 
-3.0.2 (unreleased)
+4.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Drop support for python 2.7 and 3.5, which aren't supported by isort 5.
 
 
 3.0.1 (2020-07-08)
